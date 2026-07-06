@@ -1,0 +1,9 @@
+* text=auto
+*.cs text diff=csharp
+*.csproj text diff=xml
+*.sln text
+*.md text
+*.bat text eol=crlf
+*.ini text
+*.exe binary
+*.dll binary
